@@ -6,6 +6,7 @@ import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
+import mods.thecomputerizer.discord.serverstalker.audio.AudioHandler;
 import mods.thecomputerizer.discord.serverstalker.message.MessageHandler;
 import mods.thecomputerizer.discord.serverstalker.util.MonoHelper;
 import mods.thecomputerizer.discord.serverstalker.voice.VoiceHandler;
@@ -40,6 +41,7 @@ public class ServerStalker {
     static void initializeHandlers(GatewayDiscordClient gateway) {
         MessageHandler.init(gateway);
         VoiceHandler.init(gateway);
+        AudioHandler.init();
     }
     
     public static void main(String ... args) {
@@ -58,7 +60,9 @@ public class ServerStalker {
     
     static void onReady(ReadyEvent event) {
         final User self = event.getSelf();
-        LOGGER.info("Logged in as {}",self.getUsername());
+        String username = self.getUsername();
+        LOGGER.info("Logged in as {}",username);
+        MessageHandler.setSelfUsername(username);
     }
     
     static Mono<Void> setPresence(GatewayDiscordClient gateway) {
