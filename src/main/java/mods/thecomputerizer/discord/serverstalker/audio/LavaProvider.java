@@ -18,12 +18,12 @@ public class LavaProvider extends AudioProvider {
     private final AudioPlayer player;
     private final MutableAudioFrame frame;
     
-    protected LavaProvider(AudioPlayer player) {
+    protected LavaProvider(AudioPlayer player, AudioHandler handler) {
         super(ByteBuffer.allocate(DISCORD_OPUS.maximumChunkSize()));
         this.player = player;
         this.frame = new MutableAudioFrame();
         this.frame.setBuffer(getBuffer());
-        player.addListener(TrackListener.get(AudioHandler.getInstance()));
+        player.addListener(TrackListener.get(handler));
     }
     
     public AudioPlayer getPlayer() {

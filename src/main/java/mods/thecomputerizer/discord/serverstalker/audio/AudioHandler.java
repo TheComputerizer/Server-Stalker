@@ -69,7 +69,7 @@ public class AudioHandler {
     
     private AudioHandler() {
         this.manager = setupManager(new DefaultAudioPlayerManager());
-        this.provider = new LavaProvider(this.manager.createPlayer());
+        this.provider = new LavaProvider(this.manager.createPlayer(),this);
     }
     
     public LavaProvider getProvider() {
