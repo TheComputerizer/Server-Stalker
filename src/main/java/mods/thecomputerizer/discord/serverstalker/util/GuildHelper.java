@@ -1,9 +1,13 @@
 package mods.thecomputerizer.discord.serverstalker.util;
 
+import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.channel.AudioChannel;
 import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.entity.channel.VoiceChannel;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -49,6 +53,14 @@ public class GuildHelper {
     
     public static <C extends GuildChannel> @Nullable C getFirstChannelOfType(@Nullable Guild guild, Class<C> type) {
         List<C> channels = getChannelsOfType(guild,type);
-        return channels.isEmpty() ? null : channels.getFirst();
+        return channels.isEmpty() ? null : channels.get(0);
+    }
+    
+    public static @Nullable VoiceChannel getMemberVoiceChannel(@Nullable Member member) {
+        if(Objects.isNull(member)) return null;
+        VoiceState state = member.getVoiceState().block();
+        if(Objects.isNull(state)) return null;
+        AudioChannel channel = state.getChannel().block();
+        return channel instanceof VoiceChannel ? (VoiceChannel)channel : null;
     }
 }

@@ -5,7 +5,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.spec.AudioChannelJoinSpec;
-import discord4j.voice.AudioProvider;
+import discord4j.voice.LocalVoiceReceiveTaskFactory;
 import discord4j.voice.VoiceConnection;
 import io.github.givimad.whisperjni.WhisperJNI;
 import mods.thecomputerizer.discord.serverstalker.StalkerRef;
@@ -63,9 +63,12 @@ public class VoiceHandler {
     public static boolean joinChannel(@Nullable VoiceChannel channel) {
         if(Objects.isNull(channel)) return false;
         try {
-            AudioProvider provider = AudioHandler.getInstance().getLavaProvider();
-            AudioChannelJoinSpec.builder().provider(provider).receiver(new WhisperListener()).build();
-            currentConnection = channel.join(AudioChannelJoinSpec.builder().provider(provider).build()).block();
+            AudioChannelJoinSpec spec = AudioChannelJoinSpec.builder()
+                    .provider(AudioHandler.getInstance().getLavaProvider())
+                    .receiver(new WhisperListener())
+                    .receiveTaskFactory(new LocalVoiceReceiveTaskFactory())
+                    .build();
+            currentConnection = channel.join(spec).block();
             return true;
         } catch(Throwable t) {
             LOGGER.error("Error joining voice channel {}",channel,t);
@@ -77,7 +80,7 @@ public class VoiceHandler {
     public static boolean disconnect() {
         VoiceConnection connection = getConnection();
         if(Objects.nonNull(connection)) {
-            connection.disconnect().subscribe(_ -> LOGGER.debug("Successfully disconnected from voice channel"));
+            connection.disconnect().subscribe(ignored -> LOGGER.debug("Successfully disconnected from voice channel"));
             currentConnection = null;
             return true;
         }

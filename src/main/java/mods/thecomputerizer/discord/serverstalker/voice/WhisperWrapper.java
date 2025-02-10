@@ -37,7 +37,7 @@ public class WhisperWrapper {
     private @Nullable WhisperContext getContext() {
         if(Objects.nonNull(this.context)) return this.context;
         try {
-            this.context = this.whisper.init(Path.of(System.getProperty("user.home"),"ggml-tiny.bin"));
+            this.context = this.whisper.initNoState(Path.of(System.getProperty("user.home"),"ggml-tiny.bin"));
         } catch(IOException ex) {
             LOGGER.error("Failed to initialize whisper context",ex);
         }
@@ -45,17 +45,28 @@ public class WhisperWrapper {
     }
     
     private WhisperFullParams getParameters() {
-        if(Objects.isNull(this.parameters)) this.parameters = new WhisperFullParams();
+        if(Objects.isNull(this.parameters)) {
+            this.parameters = new WhisperFullParams();
+            this.parameters.durationMs = 3000;
+            //this.parameters.noContext = false;
+            //try {
+            //    this.parameters.grammar = this.whisper.parseGrammar(Path.of(System.getProperty("user.home"),"grammar/assistant.gbnf"));
+            //    this.parameters.grammarPenalty = 100f;
+            //} catch(IOException ex) {
+            //    LOGGER.error("Failed to parse grammar",ex);
+            //}
+        }
         return this.parameters;
     }
     
     private String getText(WhisperContext context) {
-        this.whisper.fullNSegments(context);
-        return this.whisper.fullGetSegmentText(context,0);
+        int segments = this.whisper.fullNSegments(context);
+        if(segments>=1) LOGGER.info("WE GOT A SEGMENT LETS GOOO {}",segments);
+        return segments>=1 ? this.whisper.fullGetSegmentText(context,0) : "";
     }
     
     private int listen(float[] samples) {
-        int result = this.whisper.full(getContext(), getParameters(), samples, samples.length);
+        int result = this.whisper.full(getContext(),getParameters(),samples,samples.length);
         if(result!=0) throw new RuntimeException("Failed to transcribe audio");
         return result;
     }

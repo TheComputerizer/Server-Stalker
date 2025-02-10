@@ -6,8 +6,10 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.VoiceChannel;
 import mods.thecomputerizer.discord.serverstalker.StalkerRef;
 import mods.thecomputerizer.discord.serverstalker.audio.AudioHandler;
+import mods.thecomputerizer.discord.serverstalker.util.GuildHelper;
 import mods.thecomputerizer.discord.serverstalker.util.RandomHelper;
 import mods.thecomputerizer.discord.serverstalker.util.ResourceHelper;
 import mods.thecomputerizer.discord.serverstalker.voice.VoiceHandler;
@@ -42,10 +44,14 @@ public class MessageHandler {
     static void onMessage(MessageCreateEvent event) {
         Message message = event.getMessage();
         if(checkPing(message) && !PING_RESPONSES.isEmpty()) {
-            String response = RandomHelper.getElement(PING_RESPONSES);
-            if(!response.isEmpty()) {
-                sendResponse(message,response);
-                return;
+            VoiceChannel channel = GuildHelper.getMemberVoiceChannel(message.getAuthorAsMember().block());
+            if(Objects.nonNull(channel)) VoiceHandler.joinChannel(channel);
+            else {
+                String response = RandomHelper.getElement(PING_RESPONSES);
+                if(!response.isEmpty()) {
+                    sendResponse(message,response);
+                    return;
+                }
             }
         }
         MessageCommand.query(message);
@@ -71,7 +77,7 @@ public class MessageHandler {
             return args.isBlank() ? VoiceHandler.joinFirstChannel(guild) :
                     VoiceHandler.joinChannel(guild,args.split(" ")[0]);
         });
-        MessageCommand.register("leave",(_,_) -> VoiceHandler.disconnect());
+        MessageCommand.register("leave",(ignored1,ignored2) -> VoiceHandler.disconnect());
         MessageCommand.register("volume",(message,args) -> {
             float volume = args.isBlank() ? 1f : Float.parseFloat(args.trim());
             if(AudioHandler.setVolume(volume))
@@ -88,7 +94,7 @@ public class MessageHandler {
             } else sendResponse(message,"Connect me to a voice channel before doing that");
             return false;
         });
-        MessageCommand.register("stop",(message,_) -> {
+        MessageCommand.register("stop",(message,ignored) -> {
             if(VoiceHandler.isConnected()) {
                 if(AudioHandler.stop()) {
                     sendResponse(message,"Stopped playing audio");

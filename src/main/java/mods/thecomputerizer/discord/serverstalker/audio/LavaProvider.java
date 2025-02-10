@@ -45,7 +45,7 @@ public class LavaProvider extends AudioProvider {
      */
     public boolean setVolume(float percent) {
         int oldVolume = this.player.getVolume();
-        int volume = (int)(Math.clamp(percent,0f,2f)*100f);
+        int volume = (int)(Math.min(Math.max(percent,0f),2f)*100f);
         if(volume!=oldVolume) {
             this.player.setVolume(volume);
             LOGGER.debug("Seting output volume to {}%",volume);
