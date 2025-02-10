@@ -49,10 +49,11 @@ repositories {
 }
 
 dependencies {
-    implementation "com.discord4j:discord4j-core:$discord4j_version"
     implementation "ch.qos.logback:logback-classic:$logback_version"
+    implementation "com.discord4j:discord4j-core:$discord4j_version"
     implementation "dev.arbjerg:lavaplayer:$logback_version"
     implementation "dev.lavalink.youtube:v2:$youtube_source_version"
+    implementation "io.github.givimad:whisper-jni:$whisper_version"
 }
 
 processResources {

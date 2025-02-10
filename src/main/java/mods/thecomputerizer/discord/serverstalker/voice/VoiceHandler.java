@@ -7,12 +7,14 @@ import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.spec.AudioChannelJoinSpec;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.VoiceConnection;
+import io.github.givimad.whisperjni.WhisperJNI;
 import mods.thecomputerizer.discord.serverstalker.StalkerRef;
 import mods.thecomputerizer.discord.serverstalker.audio.AudioHandler;
 import mods.thecomputerizer.discord.serverstalker.util.GuildHelper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import static java.lang.Boolean.TRUE;
@@ -32,7 +34,12 @@ public class VoiceHandler {
     }
     
     public static void init(GatewayDiscordClient gateway) {
-    
+        try {
+            WhisperJNI.loadLibrary();
+            WhisperJNI.setLibraryLogger(null);
+        } catch(IOException ex) {
+            LOGGER.error("Failed to load Whisper wrapper",ex);
+        }
     }
     
     public static boolean isConnected() {
@@ -47,11 +54,9 @@ public class VoiceHandler {
         return joinChannel(GuildHelper.getFirstChannelOfType(guild, VoiceChannel.class));
     }
     
-    public static boolean joinChannel(@Nullable Guild guild, String ... channelArgs) {
-        if(Objects.isNull(channelArgs) || channelArgs.length==0) return false;
-        String category = channelArgs.length>1 ? channelArgs[0] : "";
-        String name = channelArgs.length>1 ? channelArgs[1] : channelArgs[0];
-        GuildChannel channel = GuildHelper.getChannelNamed(guild,category,name);
+    public static boolean joinChannel(@Nullable Guild guild, String id) {
+        if(Objects.isNull(id) || id.isBlank()) return false;
+        GuildChannel channel = GuildHelper.getChannelByID(guild,id);
         return channel instanceof VoiceChannel && joinChannel((VoiceChannel)channel);
     }
     
@@ -59,7 +64,7 @@ public class VoiceHandler {
         if(Objects.isNull(channel)) return false;
         try {
             AudioProvider provider = AudioHandler.getInstance().getLavaProvider();
-            AudioChannelJoinSpec.builder().provider(provider).build();
+            AudioChannelJoinSpec.builder().provider(provider).receiver(new WhisperListener()).build();
             currentConnection = channel.join(AudioChannelJoinSpec.builder().provider(provider).build()).block();
             return true;
         } catch(Throwable t) {

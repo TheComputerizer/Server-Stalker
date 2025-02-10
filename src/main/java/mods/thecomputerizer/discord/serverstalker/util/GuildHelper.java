@@ -12,6 +12,14 @@ import java.util.Objects;
 
 public class GuildHelper {
     
+    public static @Nullable GuildChannel getChannelByID(@Nullable Guild guild, String id) {
+        if(Objects.isNull(guild)) return null;
+        for(GuildChannel channel : guild.getChannels().toIterable())
+            if(id.equals(channel.getId().asString()))
+                return channel;
+        return null;
+    }
+    
     public static @Nullable GuildChannel getChannelNamed(@Nullable Guild guild, String categoryName, String name) {
         for(Category category : getChannelsOfType(guild,Category.class)) {
             if(categoryName.isBlank() || categoryName.equals(category.getName())) {

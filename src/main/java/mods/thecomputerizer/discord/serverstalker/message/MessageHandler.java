@@ -69,8 +69,7 @@ public class MessageHandler {
         MessageCommand.register("join",(message,args) -> {
             Guild guild = message.getGuild().block();
             return args.isBlank() ? VoiceHandler.joinFirstChannel(guild) :
-                    VoiceHandler.joinChannel(guild,args.split(" "));
-            
+                    VoiceHandler.joinChannel(guild,args.split(" ")[0]);
         });
         MessageCommand.register("leave",(_,_) -> VoiceHandler.disconnect());
         MessageCommand.register("volume",(message,args) -> {
