@@ -1,7 +1,8 @@
+import static org.gradle.api.file.DuplicatesStrategy.EXCLUDE
+
 plugins {
     id 'idea'
     id 'java-library'
-    id 'io.github.goooler.shadow' version '8.+'
 }
 
 group = project_package
@@ -21,8 +22,8 @@ idea {
 }
 
 jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    setArchiveBaseName(project_id)
+    duplicatesStrategy = EXCLUDE
+    setArchiveBaseName project_id
     manifest {
         attributes([
                 'Implementation-Version': project_version,
@@ -33,7 +34,7 @@ jar {
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    toolchain.languageVersion = JavaLanguageVersion.of 25
 }
 
 repositories {
@@ -46,16 +47,21 @@ repositories {
         name = 'LavaLink'
         url = uri 'https://maven.lavalink.dev/releases'
     }
+    maven {
+        name = 'henkelmax.public'
+        url = uri 'https://maven.maxhenkel.de/repository/public'
+    }
 }
 
 dependencies {
     implementation "ch.qos.logback:logback-classic:$logback_version"
     implementation "com.discord4j:discord4j-core:$discord4j_version"
+    implementation "de.maxhenkel.opus4j:opus4j:$opus_version"
     implementation "dev.arbjerg:lavaplayer:$logback_version"
     implementation "dev.lavalink.youtube:v2:$youtube_source_version"
     implementation "io.github.givimad:whisper-jni:$whisper_version"
 }
 
 processResources {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = EXCLUDE
 }
